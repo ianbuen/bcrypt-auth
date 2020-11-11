@@ -15,9 +15,10 @@ body {
   background-color: #000;
 }
 
-.error-text {
+p.error-text {
   text-align: center;
   margin-top: 1rem;
+  margin-bottom: 0;
   color: #f55;
 }
 
@@ -57,4 +58,13 @@ a i {
 
 .form-control {
   margin-bottom: 2rem;
+}
+
+.tail-link {
+  margin: 0.5rem 0;
+  text-align: center;
+}
+
+.tail-link a {
+  margin: 0;
 }
