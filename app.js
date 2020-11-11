@@ -7,6 +7,8 @@ const ejs = require('ejs');
 const session = require('express-session');
 const passport = require('passport');
 const passportLocalMongoose = require('passport-local-mongoose');
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const findOrCreate = require('mongoose-findorcreate')
 
 // connect-flash
 const flash = require('connect-flash');
@@ -38,21 +40,43 @@ mongoose.connect("mongodb://localhost:27017/userDB", options);
 // define USER schema
 const userSchema = new mongoose.Schema({
   username: String,
-  password: String
+  password: String,
+  googleID: String
 });
 
-// add passport plugin to user schema
+// add passport plugin to user schema + findOrCreate
 userSchema.plugin(passportLocalMongoose);
+userSchema.plugin(findOrCreate);
 
 // create model from schema
 const User = new mongoose.model("User", userSchema);
 
-// let passport handle User auth
- passport.use(User.createStrategy());
- passport.serializeUser(User.serializeUser());
- passport.deserializeUser(User.deserializeUser());
+// let passport handle User local auth
+passport.use(User.createStrategy());
+passport.serializeUser(function(user, done) {
+  done(null, user._id);
+});
 
- // passport authenticate options
+passport.deserializeUser(function(id, done) {
+  User.findById(id, function(err, user) {
+    done(err, user);
+  });
+});
+
+ // let passport handle User auth via google
+ passport.use(new GoogleStrategy({
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callbackURL: "http://localhost/auth/google/secrets"
+  },
+  function(accessToken, refreshToken, profile, cb) {
+    User.findOrCreate({ googleID: profile.id }, function (err, user) {
+      return cb(err, user);
+    });
+  }
+));
+
+ // passport options for local auth
  const authOptions = {
      failureFlash: "Invalid username or password.",
      failureRedirect: "/login"
@@ -113,6 +137,18 @@ app.route("/secrets")
         else
             res.redirect("/login");
    });
+
+
+//========= GOOGLE SIGN-IN ROUTES ===================
+app.get("/auth/google",
+ passport.authenticate("google", { scope: ["profile"] }));
+
+app.get("/auth/google/secrets",
+   passport.authenticate("google", { failureRedirect: "/login" }),
+   function(req, res) {
+     // Successful authentication, redirect to secrets.
+     res.redirect("/secrets");
+});
 
 
 // run server on given port
