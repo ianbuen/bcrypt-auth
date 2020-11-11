@@ -1,3 +1,6 @@
+# Heroku Procfile
+Procfile
+
 # Logs
 logs
 *.log

@@ -35,7 +35,7 @@ app.use(passport.session());
 
 // set mongoDB connection via mongoose
 const options = { useUnifiedTopology: true, useNewUrlParser: true, useCreateIndex: true };
-mongoose.connect("mongodb://localhost:27017/userDB", options);
+mongoose.connect(process.env.ATLAS, options);
 
 // define USER schema
 const userSchema = new mongoose.Schema({
@@ -209,7 +209,7 @@ app.get("/auth/google/secrets",
 
 
 // run server on given port
-app.listen(80, () => {
+app.listen(process.env.PORT || 80, () => {
   console.log("Server started on Port 80.");
 });
 
