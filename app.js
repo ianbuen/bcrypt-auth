@@ -41,7 +41,8 @@ mongoose.connect("mongodb://localhost:27017/userDB", options);
 const userSchema = new mongoose.Schema({
   username: String,
   password: String,
-  googleID: String
+  googleID: String,
+  secrets: [{type: String}]
 });
 
 // add passport plugin to user schema + findOrCreate
@@ -85,14 +86,28 @@ passport.deserializeUser(function(id, done) {
 
 // root route
 app.get("/", (req, res) => {
-  res.render("home");
+  if (req.isAuthenticated())
+      res.redirect("/secrets");
+  else
+      res.render("home");
 });
 
+// variable used for messages (ie. "You need to login first")
+let message = "";
 
 // login route
 app.route("/login")
    .get((req, res) => {
-        res.render("login", {message: req.flash('error') });
+        if (req.isAuthenticated())
+            return res.redirect("/secrets");
+
+        if (message != "") {
+            const msg = message;
+            message = "";
+            return res.render("login", {message: msg});
+        }
+
+        res.render("login", {message: req.flash('error')});
    })
 
    // POST LOGIN - 2 functions as parameters (auth and callback)
@@ -111,6 +126,9 @@ app.route("/logout")
 // register route
 app.route("/register")
    .get((req, res) => {
+       if (req.isAuthenticated())
+           return res.redirect("/secrets");
+
         res.render("register", { message: "" });
    })
 
@@ -120,11 +138,12 @@ app.route("/register")
 
       User.register(user, req.body.password, (err, acc) => {
         if (err)
-            res.render("register", { message: err.message });
-        else
-            passport.authenticate("local")(req, res, () => {
-                res.redirect("/secrets");
-            });
+            return res.render("register", { message: err.message });
+
+        passport.authenticate("local")(req, res, () => {
+            res.redirect("/secrets");
+            message = "";
+        });
       });
    }); // REG POST METHOD END
 
@@ -132,11 +151,49 @@ app.route("/register")
 // secrets page route
 app.route("/secrets")
    .get((req, res) => {
-        if (req.isAuthenticated())
-            res.render("secrets");
-        else
+        if (req.isAuthenticated()) {
+            User.find({ secrets: {$ne: null} }, (err, foundUsers) => {
+              if (err)
+                  console.log(err);
+              else
+                  res.render("secrets", { users: foundUsers });
+            });
+
+        } else {
+            message = "You need to login first.";
             res.redirect("/login");
+          }
    });
+
+ // submit page ROUTES
+ app.route("/submit")
+    .get((req, res) => {
+      if (req.isAuthenticated())
+          res.render("submit");
+      else {
+          message = "You need to login first.";
+          res.redirect("/login");
+      }
+    })
+
+    .post((req, res) => {
+      // retrieve the input
+      const secret = req.body.secret;
+
+      // get current User
+      const currentUser = req.user;
+
+      // add the new secret to user's secret list
+      currentUser.secrets.push(secret);
+
+      // save changes to user after updating list of secrets
+      currentUser.save((err) => {
+        if (err)
+            console.log(err);
+        else
+            res.redirect("/secrets");
+      });
+    });
 
 
 //========= GOOGLE SIGN-IN ROUTES ===================

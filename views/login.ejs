@@ -1,11 +1,12 @@
 <%- include('partials/header') %>
+<%- include('partials/navbar') %>
 
 <div class="container mt-5">
   <h1>Login</h1>
 
 
   <div class="row">
-    <div class="col-sm-8">
+    <div class="col-md-12 col-lg-8">
       <div class="card">
         <div class="card-body">
 
@@ -19,7 +20,7 @@
               <label for="password">Password</label>
               <input type="password" class="form-control" name="password">
             </div>
-            <button type="submit" class="btn btn-dark">Login</button>
+            <button type="submit" class="btn btn-block btn-dark">Login</button>
             <p class="error-text"><%= message %></p>
           </form>
 
@@ -27,10 +28,10 @@
       </div>
     </div>
 
-    <div class="col-sm-4">
+    <div class="col-md-12 col-lg-4">
       <div class="card">
         <div class="card-body">
-          <a class="btn btn-block btn-social btn-google" href="/auth/google" role="button">
+          <a class="btn btn-block btn-lg btn-social btn-google" href="/auth/google" role="button">
             <i class="fab fa-google"></i>
             Sign In with Google
           </a>

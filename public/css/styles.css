@@ -8,6 +8,7 @@ body {
 }
 
 .secret-text {
+  margin-bottom: 1.5rem;
   text-align: center;
   font-size: 2rem;
   color: #fff;
@@ -15,7 +16,45 @@ body {
 }
 
 .error-text {
-  display: inline;
+  text-align: center;
+  margin-top: 1rem;
   color: #f55;
-  margin: 0 10px;
+}
+
+div a, div button {
+  margin-right: 2%;
+}
+
+.navbar-brand .fa-key {
+  margin-right: 0.5rem;
+}
+
+.navbar-brand {
+  margin: 0.5rem 0;
+}
+
+.display-3 {
+  font-size: 3.5rem;
+  margin: 2rem 0;
+}
+
+hr {
+  margin: 2rem 0;
+}
+
+a i {
+  margin-left: 1rem;
+  padding-right: 1rem;
+}
+
+.btn-social {
+  text-align: center;
+}
+
+.col-md-12 {
+  margin-top: 1rem;
+}
+
+.btn-dark {
+  margin-top: 2rem;
 }
